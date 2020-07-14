@@ -9,13 +9,13 @@ To install Pi20English use the pip packaging service [pip](https://pip.pypa.io/e
 
 
 ```
-$ sudo pip3 install Pi20
+$ sudo pip3 install Pi20English
 ```
 
 Alternatively github can be used for the installation.
 ```bash git clone https://github.com/HisarCS/Pi20.git
-$ git clone https://github.com/HisarCS/Pi20.git
-$ cd Pi20
+$ git clone https://github.com/AndyEmreHis/Pi20English.git
+$ cd Pi20English
 $ sudo python setup.py install
 ```
 
