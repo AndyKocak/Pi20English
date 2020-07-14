@@ -1,291 +1,281 @@
-## PiWars Türkiye 2020: HisarCS tarafından dağıtılan robot kitleri için python kütüphanesi  
+## PiWars Turkey 2020: Distributed by Hisar Cs for use in the PiWars Turkey competition.  
   
-Bu python kütüphanesi, PiWars Türkiye 2020 katılımcılarının HisarCS tarafınndan hazırlanan robot kitlerindeki yazılımı, sensörleri ve hareketli parçaları kullanmalarını kolaylaştırmak amacıyla yapılmıştır.  
+This python library was made for the purposes of making coding easier for the robot kits distributed by Hisar Cs for the PiWars Turkey Competition.  
 
 
-## Kurulum
+## Setup
 
-Pi20'yi indirmek için [pip](https://pip.pypa.io/en/stable/) paketleme yöneticisini kullanın.
+To install Pi20English use the pip packaging service [pip](https://pip.pypa.io/en/stable/),  and run the code below.
 
 
 ```
 $ sudo pip3 install Pi20
 ```
 
-Alternatif olarak Github'dan indirmek de mümkün.
+Alternatively github can be used for the installation.
 ```bash git clone https://github.com/HisarCS/Pi20.git
 $ git clone https://github.com/HisarCS/Pi20.git
 $ cd Pi20
 $ sudo python setup.py install
 ```
 
-## Kullanım
+## Usage
 
 ```python
 import Pi20
 ```
-## Belgeleme
+## Documentation
 
-Şu anda bu kütüphanede 5 sınıf bulunmaktadır:
-- HizlandirilmisPiKamera (Pi Kamera ve opencv kullanmayı basitleştirmek ve optimize etmek için)
-- Kumanda (pygame'in Joystick sınıfını PS4 sixaxis kumandalar ile kullanmayı basitleştirmek için)
-- MotorKontrol (Raspberry Pi için Pololu DRV8835 motor sürücü devresinin kullanımını kolaylaştırmak için)
-- ServoKontrol (Raspberry Pi'ın GPIO pinleri ile servo kontrol etmeyi kolaylaştırmak için)
-- UltrasonikSensoru (Raspberry Pi'ın GPIO pinleri ile HC-SR04 ultrasonik uzaklık sensörünü kullanmayı kolaylaştırmak için)
+Currently the library has 5 modules:
+-  simplifiedPiCam(To optimize and make the usage of OpenCV easier.)
+- Controller (To make taking input from the PS3 controller using pygame easier.)
+- MotorControl (To make using the pololuDRV8835 motor controllers easier to use.)
+- ServoControl (To make using the Servo Motors through the GPIO pins easier.)
+- UltrasonicSensor (To make using the HC-SR04 ultrasonic distance sensor easier to use.)
 
-Performans sebeplerinden dolayı sınıfların bir kısmı multithreading kullanmaktadır. Bu yazılımın bir kısmının diğerlerinin performansını değiştirmesini engellemek içindir. Multithreading özellikle kullanıldığı sınıflar HizlandirilmisPiKamera (hem görüntüyü almak hem göstermek için), Kumanda (sürekli olarak kumanda değerlerini almak için) ve ServoKontrol (içindeki sleep fonksiyonlarının ana threadi durdurmasını engellemek için).
+For performance reasosn this library uses multithreading. So that other pieces of running code wont be affected. Modules that use multithreading simplifiedPiCam (for displaying and taking the output of the camera), Controller (to continuously take input from the controller.) ve ServoControl (To stop it from disabling the main thread through sleep).
 
-HizlandirilmisPiKamera:
+simplifiedPiCam:
 -
-- Metodlar
+- Methods
 
 ```python
-__veriGuncelle__()
+__updateValues__()
 ```
-Pi Kameradan gelen verileri bir while loop'un içerisinde günceller.  Ana threadde çağırmak **tavsiye edilmez** çünkü program bu satırda takılacaktır.
+Updates the frame by the values recieved from the PiCam inside a while loop.  Calling it in the main thread **Is not reccomended** since it will most likely get stuck on that line.
 
 ```python
-veriOkumayaBasla()
+startReadingValues()
 ```
-Ana threadi yavaşlatmadan veriyi güncellemek için yeni bir threadde ``` __veriGuncelle__()``` fonksiyonunu çağırır.  Bunu sadece başlangıçta kullanarak programın her yerinde kamera verilerine ulaşabilirsiniz.
+Starts a new thread with the ``` __updateValues__()``` method called.  By calling this from the start you can access the camera values from anywhere in the code.
 
 ```python
-veriOku()
+readValues()
 ```
-NumPy listesi olarak kameranın o andaki değerlerini geri döndürür.  Bu döndürdüğü NumPy listesi ise yukarıda bahsedildiği gibi ``` __veriGuncelle__()``` fonksiyonunda bir while loop içerisinde her zaman yenilenir.
+Returns the values from the camera as a NumPy list. This numpy list is updated continupusly in the ``` __updateValues__()``` method.
 
 ```python
-__kareyiGostermeyiGuncelle__()
+__updateFrame__()
 ```
-girilen parametreler dahilinde yeni opencv pencereleri açar ve pencereyi bir while loop içerisinde günceller. "q" tuşu ile pencere kapatılabilir.  Ana threadde çağırmak **tavsiye edilmez** çünkü program bu satırda takılacaktır.
-
+Makes a new openCV window with given parameters and updates it continuously. when "q" is pressed the window is closed. Calling it in the main thread **Is not reccomended** since it will most likely get stuck on that line.
 ```python
-kareyiGoster()
+showSquare()
 ```
-Ana threadi yavaşlatmadan bir pencere açmak için  ``` __kareyiGostermeyiGuncelle__()``` fonksiyonunu başka bir threadde çağırır.  İki parametre alır ve bunlar da pencerenin ismi ve pencerede gösterilecek görüntüdür. Farklı pencere isimleri ve görüntüleri kullanarak ve bunları da bir while loop içeirisinde çağırarak gösterilecek olan görüntüleri güncelleyebilirsiniz. Eğer parametre olarak hiçbir şey girilmezse fonksiyon varsayılan olarak kameranın ham görüntüsünü 'frame' isimli bir pencerede göstermeye başlar.
-
-- Örnek Kullanım
+To start a window without slowing the mainthread, calls the  ``` __updateFrame__()``` method in another thread. It takes two parameters, being the windows name and what will be displayed. By entering different paramaters and calling it in a while loop you can update the values. If no parameters are given the method will use the placeholder values of the title called 'frame' and the raw output of the PiCam
+- Example Usage.
 
 ```python
-from Pi20 import HizlandirilmisPiKamera
+from Pi20English import simplifiedPiCam
 from time import sleep
 
-camera = HizlandirilmisPiKamera()
-camera.veriOkumayaBasla()
+camera = simplifiedPiCam()
+camera.readValues()
 sleep(1)
 
 while True:
-	camera.kareyiGoster()
+	camera.showSquare()
 ```
-Yukarıdaki örnek yeni bir HizlandirilmisPiKamera objesi oluşturur, ``` veriOkumayaBasla()```   fonksiyonu ile kameradan verileri almaya başlar ve while loop'un içinde de ``` kareyiGoster()```  fonksiyonu ile okunan verileri ekranda 'frame' isimli pencere oluşturup kameradan okunan ham verileri gösterir.
+The example above makes another simplifiedPiCam object, starts taking values through the ``` readValues()``` method and returns the raw output of the camera to the display using the  ``` showSquare()``` method in a while loop.
 
-Kamera objesi çağırılınca varsayılan çözünürlük 640x480 dir. Eğer başka bir çözünürlük istiyorsanız, örneğin 1280x720, kamera objesini bu şekilde oluşturabilirsiniz:
+The camre object has a pre set resolution of 640x480. If you want to change the resolution, you can do so like this:
 
-``` camera = HizlandirilmisPiKamera(cozunurluk=(1280, 720))```
+``` camera = simplifiedPiCam(resolution=(1280, 720))```
 
-Eğer ki sonradan yaptığınız görüntü işleme adımlarınızı da ayrı pencerelerde göstermek istiyorsanız ```kareyiGoster()```  fonksiyonunu birkaç kez kullanarak kodunuzu yavaşlatmadan pencereleri ayrı bir thread'de çalıştırabilirsiniz. Bunun için aşağıdaki kodu referans alabilirsiniz.
-
+If you want to see your code in a different window you can use the ```showSquare()``` method multiple times to make more threads. You can take the code below as a reference.
 ```python
-from Pi20 import HizlandirilmisPiKamera
+from Pi20English import simplifiedPiCam
 import imutils
 import cv2
 from time import sleep
 
-kamera = HizlandirilmisPiKamera()
-kamera.veriOkumayaBasla()
+camera = simplifiedPiCam()
+camera.startReadingValues()
 sleep(1)
 
 while True:
-	kamera.kareyiGoster()
-	yenidenBoyutlandirilmis = imutils.resize(kamera.veriOku(), width=300)
-	kamera.kareyiGoster("yenidenBoyutlandirilmis", yenidenBoyutlandirilmis)
-	gri = cv2.cvtColor(kamera.veriOku(), cv2.COLOR_BGR2GRAY)
-	kamera.kareyiGoster("siyah - beyaz", gri)
+	camera.showSquare()
+	resized = imutils.resize(camera.readValues(), width=300)
+	camera.showSquare("resized", resized)
+	gray = cv2.cvtColor(camera.readValues(), cv2.COLOR_BGR2GRAY)
+	camera.showSquare("black - gray", gray)
 ```
-Yukarıdan da görüldüğü gibi, ```kareyiGoster()```  fonksiyonunu birkaç kez kullanarak görüntü işleme algoritmanızdaki farklı aşamaları ekranda izleyebilirsiniz. Ayrıca yukarıdaki programda, ilk kez ```veriOku()``` fonksiyonunu kullanmaktayız. Fonksiyon açıklamalarında da belirtildiği gibi, bize, kameranın o andaki gördüğü görüntüsünü geri döndürür. Biz de bunu kullanarak resmimizi yeniden boyutlandırabiliyoruz.
-
-Kumanda
+Controller
 -
-- Metodlar
+- Methods
 
 ```python
-__yenile__()
+__refresh__()
 ```
-Kumandadan alınan verileri bir while döngüsü içerisinde yeniler. Ana threadde çağırmak **tavsiye edilmez** çünkü program bu satırda takılacaktır.
+Refreshes the values taken from the controller.  Calling it in the main thread **Is not reccomended** since it will most likely get stuck on that line.
 
 ```python
-dinlemeyeBasla()
+startTakingInputs()
 ```
-```__yenile__()``` metodunu ayrı bir thread üzerinde çağırarak ana thread'in kullanılabilmesini sağlar.
+Calls the ```__yenile__()``` method on a new thread so that the main thread can be used.
 
 ```python
-solVerileriOku()
+readLeftValues()
 ```
-Soldaki joystick değerlerini iki float değeri, x ve y, olarak verir.
+Takes input from the left side of the joystick, and returns them as x, y float values.
 
 ```python
-sagVerileriOku()
+readRightValues()
 ```
-Sağdaki joystick değerlerini iki float değeri, x ve y, olarak verir.
+Takes input from the left side of the joystick, and returns them as x, y float values.
 
 ```python
-butonlariOku()
+readButtons()
 ```
-Basılan bütün düğmeleri sayı değeri olarak bir arrayde geri verir.
+returns all button presses as an integer value in an array.
 
 ```python
-verileriOku()
+readValues()
 ```
-Kumandanın bütün değerlerini tuple tipinde geri verir ```(python solVerileriOku(), python sagVerileriOku(), python butonlariOku())```
+returns all values from the controller as a tuple ```(python readLeftValues(), python readRightValues(), python readButtons())```
 
-- Örnek Kullanım
+- Example Usage
 
 ```python
-import Pi20
+import Pi20English
 
-joystik = Pi20.Kumanda()
-joystik.dinlemeyeBasla()
+joystick = Pi20English.Controller()
+joystick.startTakingInputs()
 
 while True:
-	lx, ly = joystik.solVerileriOku()
-	rx, ry = joystik.sagVerileriOku()
-	buttons = joystik.butonlariOku()
+	lx, ly = joystick.readLeftValues()
+	rx, ry = joystick.readRightValues()
+	buttons = joystick.readButtons()
 
-	print("Sağ joystik değerleri: ", lx, ly)
-	print("Sol joystik değerleri: ", rx, ry)
+	print("Right joystick values: ", lx, ly)
+	print("Left joystick values: ", rx, ry)
 
 	if(0 in buttons):
-		print("0 Butonu basıldı!")
+		print("0 Buttons pressed!")
 ```
-Yukarıdaki kod bir Kumanda objesi oluşturur ve sol ve sağ joysticklerin değerlerini ekrana basarken aynı zamanda belirlenmiş bir stringi bir düğmeye basıldığında ekrana basar. ```dinlemeyeBasla()``` metodunun veri alabilmek için ana kod başlatıldığında çağırılması gerektiğini unutmayınız.
+The code above reads the input of the joysticks and prints them out continuously. Don't forget that the ```startTakingInputs()``` method is required to be called so that you can take the values.
 
-MotorKontrol
+MotorControl
 -
-- Metodlar
+- Methods
 
 ```python
-hizlariAyarla(sagHiz, solHiz)
+adjustSpeed(rightSpeed, leftSpeed)
 ```
-pololu-drv8835-rpi kütüphanesini kullanarak motorların hızını ayarlar. Hız -480'den +480'e kadar değerler olarak verilebilir (-480 geriye doğru tam hız olur). Sağ ve sol hız değerleri motor sürücüsünün birinci ve ikinci motorlarına denk gelir.
+Sets the sped of the motors using the pololu-drv-8835 library. The speeds range from -480 to +480(480 is the max backwards and forwards speed). The right and left speeds represent the right and left motors on the motor controller.
 
 ```python
-kumandaVerisiniMotorVerilerineCevirme(x, y)
+changeControllerValueToMotorValue(x, y)
 ```
-Motor hız değerlerini kumanda verisine dayanarak geri verir. x ve y, kumandanın joystick x ve y değerlerini temsil eder ve 0 ve 1 arasında bir değer alır.
+Gives motor speed values based on the joystick inputs. The x and y represents the joystick inputs and holds a value between 0 and 1.
 
-- Örnek Kullanım
+- Example Usage
 
 ```python
-import Pi20
-motorlar = Pi20.MotorKontrol()
+import Pi20English
+motors = Pi20English.MotorControl()
 
 while True:
-	motorlar.hizlariAyarla(480, 480)
+	motors.adjustSpeed(480, 480)
 ```
-Bu kod motorları başlatır ve ileri doğru tam hıza ayarlar.
+This code runs the motors forwards at max speed.
 
-- Kumanda ile Örnek Kullanım
+- Controller Example Usage
 
 ```python
-import Pi20
+import Pi20English
 
-motorlar = Pi20.MotorKontrol()
+motors = Pi20English.MotorControl()
 
-joystik = Pi20.Kumanda()
-joystik.dinlemeyeBasla()
+joystick = Pi20English.Controller()
+joystick.startTakingInputs()
 
 while True:
-	lx, ly = joystik.solVerileriOku()
-	sagHiz, solHiz = motorlar.kumandaVerisiniMotorVerilerineCevirme(lx, ly)
+	lx, ly = joystick.readLeftValues()
+	rightSpeed, leftSpeed = motors.changeControllerValueToMotorValue(lx, ly)
 
-	motorlar.hizlariAyarla(sagHiz, solHiz)
+	motors.adjustSpeed(rightSpeed, leftSpeed)
 ```
-Yukarıdaki kod motorlar ve kumanda objelerini başlatır ve bir while döngüsünün içine girer. Döngüdeyken  ```kumandaVerisiniMotorVerilerineCevirme()``` metodu motorların hız değerlerini bulmak için kullanılır.
+The code above starts the controller and motor objects and enters a while loop. in the loop the  ```changeControllerValueToMotorValue()``` method is used to find the speed value of the motors.
 
-ServoKontrol
+ServoControl
 -
-- Metodlar
+- Methods
 
 ```python
-surekliDonmeyeAyarla()
-tekDonmeyeAyarla()
+setToContinuousSpin()
+setToSingleSpin()
 ```
-Servoyu sürekli dönme ve tek sefer dönmeye ayarlar. Sürekli dönme modu dinamik olarak değerler verilmesini gerektirirken tek dönme servoyu verilen açıya getirir ve sonrasında uykuya geçer.
+Sets servo state to either continous or single spin. The continuous spin dynamically keeps adjusting the angle of the servo, while the single spin is used to set an angle once and puts it in sleep mode.
 
 ```python
-aciAyarla(aci)
+setAngle(angle)
 ```
-Servoyu derece cinsinden verilen açıya çevirir. Servo tek dönmeye ayarlıyken ayrı bir thread oluşturulur ve servo değeri istenen açıya gelince uyur.
+Sets the servos postition based on an angle. If the state is set to single spin, then the a new thread will be made so that the servo will stop doing its current actions and sleep.
 
-- Örnek Kullanım
+- Example Usage
 
-Sürekli Dönme:
+Continuous Spin:
 ```python
-import Pi20
+import Pi20English
 from time import sleep
 
-servo = Pi20.ServoKontrol(35)
-servo.surekliDonmeyeAyarla()
+servo = Pi20English.ServoControl(35)
+servo.setToContinuousSpin()
 
-aci = 0
-ekle = 0
+angle = 0
+add = 0
 
 while True:
-	servo.aciAyarla(aci)
+	servo.setAngle(angle)
 
-	if(aci == 180):
-		ekle = -1
-	elif(aci == 0):
-		ekle = 1
-	aci += ekle
+	if(angle == 180):
+		add = -1
+	elif(angle == 0):
+		add = 1
+	angle += add
 	sleep(0.05)
 ```
-Bu durumda servo sürekli dönmeye ayarlıdır. Bir while döngüsü servonun açısını 1er 1er arttırır ve servoyu yeni açıya getirir.
+In the code above the servo is set to spin continuously, and a while loop is used to increase the servos angle one by one.
 
-Tek Dönme:
+Single Spin:
 ```python
-import Pi20
+import Pi20English
 from time import sleep
 
-servo = Pi20.ServoKontrol()
-servo.tekDonmeyeAyarla()
+servo = Pi20English.ServoControl(35)
+servo.setToSingleSpin()
 
 while True:
-	servo.aciAyarla(180)
+	servo.setAngle(180)
 	sleep(1)
-	servo.aciAyarla(0)
+	servo.setAngle(0)
 	sleep(1)
 ```
-Bu durumda servo tek dönmeye ayarlıdır. Bir while döngüsü servonun açısını 1 saniye aralıklarla 180 ve 0 arasında değiştirir.
+In this code the servo is set to single spin, so the angle will be set to either 180 or 0 in 1 second intervals.
 
-UltrasonikSensoru
+UltrasonicSensor
 -
-- Metodlar
+- Methods
 
 ```python
-mesafeOku()
+readDistance()
 ```
-Ultrasonik sensörün ölçtüğü mesafeyi geri verir.
+Returns the sensors recorded value.
 
-- Örnek Kullanım
+- Example Usage
 
 ```python
-import Pi20
+import Pi20English
 
-ultra = Pi20.UltrasonikSensoru(38, 40)
-ultra.mesafeOlcmeyeBasla()
+ultra = Pi20English.UltrasonicSensor(38, 40)
+ultra.startMeasuringDistance()
 while True:
-	anlikDeger = ultra.mesafeOku()
-	print(anlikDeger)
+	currentValue = ultra.readDistance()
+	print(currentValue)
 ```
-Yukarıdaki kod ölçülen mesafeyi önce medyan ve sonra anlık değer olmak üzere ekrana basar. Yapıcının(constructor), ya da ultra nesnesi oluştururkenki kullandığımız kod satırı,  içindeki değerler ultrasonik sensörün takılı olduğu pinlerdir.
+The code above prints the current distance recorded by the sensor. The paramaters given in the constructor are the pins of the sensor, being echo and trig respectively.
 
 
-## Katkıda Bulunma
-Çekme istekleri kabul edilir. Büyük değişikler için lütfen önce bir issue açarak istediğiniz değişikliği anlatın.
-
-Lütfen testleri uygun şekilde güncellediğinizden emin olun.
-
-## Lisans
+## License
 [MIT](https://choosealicense.com/licenses/mit/)
 
