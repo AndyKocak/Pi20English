@@ -19,6 +19,21 @@ $ cd Pi20English
 $ sudo python setup.py install
 ```
 
+Note: if the some of the dependincies could not be installed through the setup.py, then please run these commands on the terminal:
+```
+sudo apt-get install libhdf5-dev libhdf5-serial-dev libhdf5-100
+sudo apt-get install libqtgui4 libqtwebkit4 libqt4-test python3-pyqt5
+sudo apt-get install libatlas-base-dev
+sudo apt-get install libjasper-dev
+sudo pip3 install numpy
+sudo pip3 install opencv-contrib-python==3.4.3.18
+sudo pip3 install pygame
+sudo pip3 install picamera
+sudo pip3 install wiringpi
+git clone https://github.com/pololu/drv8835-motor-driver-rpi.git
+cd drv8835-motor-driver-rpi
+sudo python setup.py install
+```
 ## Usage
 
 ```python
@@ -27,7 +42,7 @@ import Pi20English
 ## Documentation
 
 Currently the library has 5 modules:
--  simplifiedPiCam(To optimize and make the usage of OpenCV easier.)
+- simplifiedPiCam(To optimize and make the usage of OpenCV easier.)
 - Controller (To make taking input from the PS3 controller using pygame easier.)
 - MotorControl (To make using the pololuDRV8835 motor controllers easier to use.)
 - ServoControl (To make using the Servo Motors through the GPIO pins easier.)
