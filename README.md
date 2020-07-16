@@ -22,7 +22,7 @@ $ sudo python setup.py install
 ## Usage
 
 ```python
-import Pi20
+import Pi20English
 ```
 ## Documentation
 
