@@ -8,7 +8,7 @@ class MotorControl:
         self.rightSpeed = 0
         self.leftSpeed = 0
 
-    def adjustSpeed(self, hizSag, hizSol):
+    def adjustSpeed(self, rightSpeed, leftSpeed):
         self.rightSpeed = rightSpeed
         self.leftSpeed = leftSpeed
 
